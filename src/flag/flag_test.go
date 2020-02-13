@@ -6,7 +6,7 @@ package flag_test
 
 import (
 	"bytes"
-	. "flag"
+	. "flag" // 加点的作用是调用flag包里的函数不用使用加"flag."
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -18,6 +18,7 @@ import (
 	"time"
 )
 
+// boolString函数： 将字符串0和非0转换成字符串'false'/'true'
 func boolString(s string) string {
 	if s == "0" {
 		return "false"
@@ -139,17 +140,23 @@ func TestGet(t *testing.T) {
 	VisitAll(visitor)
 }
 
+// TestUsage函数： 测试参数未定义但是传参给命令，
+// 此时会报错"flag provided but not defined: -x"
 func TestUsage(t *testing.T) {
 	called := false
+	// 变量called的作用域
 	ResetForTesting(func() { called = true })
 	if CommandLine.Parse([]string{"-x"}) == nil {
 		t.Error("parse did not fail for unknown flag")
+	} else {
+		t.Error("hahahh")
 	}
 	if !called {
 		t.Error("did not call Usage for unknown flag")
 	}
 }
 
+// testParse函数： 测试样例TestParse/TestFlagSetParse要调用的函数
 func testParse(f *FlagSet, t *testing.T) {
 	if f.Parsed() {
 		t.Error("f.Parse() = true before Parse")
@@ -237,6 +244,7 @@ func (f *flagVar) Set(value string) error {
 	return nil
 }
 
+// TestUserDefined测试用例： 用户自定义命令参数（切片类型）测试
 func TestUserDefined(t *testing.T) {
 	var flags FlagSet
 	flags.Init("test", ContinueOnError)
@@ -280,10 +288,12 @@ func (b *boolFlagVar) Set(value string) error {
 	return nil
 }
 
+// IsBoolFlag方法： 判别接受者boolFlagVar是否是boolFlagVar。boolFlag接口
 func (b *boolFlagVar) IsBoolFlag() bool {
 	return b.count < 4
 }
 
+// TestUserDefined测试用例： 用户自定义命令参数（计数类型）测试
 func TestUserDefinedBool(t *testing.T) {
 	var flags FlagSet
 	flags.Init("test", ContinueOnError)
@@ -321,15 +331,17 @@ func TestSetOutput(t *testing.T) {
 func TestChangingArgs(t *testing.T) {
 	ResetForTesting(func() { t.Fatal("bad parse") })
 	oldArgs := os.Args
-	defer func() { os.Args = oldArgs }()
+	defer func() { os.Args = oldArgs }()	// 支持测试环境走完,恢复测试现场
 	os.Args = []string{"cmd", "-before", "subcmd", "-after", "args"}
 	before := Bool("before", false, "")
+	// 解析到subcmd因为未以-开头，返回false,nil
 	if err := CommandLine.Parse(os.Args[1:]); err != nil {
 		t.Fatal(err)
 	}
 	cmd := Arg(0)
 	os.Args = Args()
 	after := Bool("after", false, "")
+	// 解析到args因为未以-开头，返回false,nil
 	Parse()
 	args := Args()
 
@@ -358,6 +370,7 @@ func TestHelp(t *testing.T) {
 		helpCalled = false // reset for next test
 	}
 	// Help flag should work as expected.
+	// 触发Usage()
 	err = fs.Parse([]string{"-help"})
 	if err == nil {
 		t.Fatal("error expected")
@@ -369,6 +382,7 @@ func TestHelp(t *testing.T) {
 		t.Fatal("help was not called")
 	}
 	// If we define a help flag, that should override.
+	// 通过'-help'触发Usage()
 	var help bool
 	fs.BoolVar(&help, "help", false, "help flag")
 	helpCalled = false

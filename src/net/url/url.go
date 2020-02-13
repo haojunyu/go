@@ -353,16 +353,17 @@ func escape(s string, mode encoding) string {
 //
 // URL's String method uses the EscapedPath method to obtain the path. See the
 // EscapedPath method for more details.
+// URL结构体： URI资源[scheme:][//[userinfo@]host][/]path[?query][#fragment]
 type URL struct {
-	Scheme     string
+	Scheme     string    // url协议
 	Opaque     string    // encoded opaque data
-	User       *Userinfo // username and password information
-	Host       string    // host or host:port
-	Path       string    // path (relative paths may omit leading slash)
+	User       *Userinfo // username and password information 用户信息
+	Host       string    // host or host:port IP地址和端口PORT
+	Path       string    // path (relative paths may omit leading slash)路径
 	RawPath    string    // encoded path hint (see EscapedPath method)
-	ForceQuery bool      // append a query ('?') even if RawQuery is empty
+	ForceQuery bool      // append a query ('?') even if RawQuery is empty 参数
 	RawQuery   string    // encoded query values, without '?'
-	Fragment   string    // fragment for references, without '#'
+	Fragment   string    // fragment for references, without '#' 锚
 }
 
 // User returns a Userinfo containing the provided username
